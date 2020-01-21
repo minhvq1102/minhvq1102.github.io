@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Firebase Notifications Demo</title>
+	<style>
+    div {
+        margin-bottom: 15px;
+    }
+</style>
+</head>
+<body>
+<div id="token"></div>
+<div id="msg"></div>
+<div id="notifications"></div>
+<div id="err"></div>
+<script>
+	MsgElem = document.getElementById("msg");
+	TokenElem = document.getElementById("token");
+	NotisElem = document.getElementById("notifications");
+	ErrElem = document.getElementById("err");
+</script>
+<!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-messaging.js"></script>
+
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+
+<script>
+  // Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: "AIzaSyBNSeCsoaOH7q1_9FL8NoQTAAHG_czoSSg",
+    authDomain: "opss-crm-dev.firebaseapp.com",
+    databaseURL: "https://opss-crm-dev.firebaseio.com",
+    projectId: "opss-crm-dev",
+    storageBucket: "opss-crm-dev.appspot.com",
+    messagingSenderId: "547976563953",
+    appId: "1:547976563953:web:44557f7ad914ece70c2d50"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const messaging = firebase.messaging();
+  messaging
+		  .requestPermission()
+		  .then(function () {
+			  MsgElem.innerHTML = "Notification permission granted.";
+			  console.log("Notification permission granted.");
+
+			  // get the token in the form of promise
+			  return messaging.getToken()
+		  })
+		  .then(function(token) {
+			  TokenElem.innerHTML = "token is : " + token;
+		  })
+		  .catch(function (err) {
+			  ErrElem.innerHTML =  ErrElem.innerHTML + "; " + err;
+			  console.log("Unable to get permission to notify.", err);
+		  });
+
+  messaging.onMessage(function(payload) {
+	  console.log("Message received. ", payload);
+	  NotisElem.innerHTML = NotisElem.innerHTML + JSON.stringify(payload);
+	  const {title, ...options} = payload.notification;
+	  navigator.serviceWorker.ready.then(registration => {
+		  registration.showNotification(title, options);
+	  });
+  });
+</script>
+</body>
+</html>
